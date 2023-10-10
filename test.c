@@ -2,12 +2,23 @@
 #include "stdlib.h"
 #include "unistd.h"
 #include "get_next_line.h"
+#include "stdio.h" //to remove
+#include "stdlib.h"
+#include "unistd.h"
+#include "get_next_line.h"
+
+
+#include "stdio.h" //to remove
+#include "stdlib.h"
+#include "unistd.h"
+#include "get_next_line.h"
 
 int	ft_strlen(char *s)
 {
 	int	i;
 
 	i = 0;
+	// printf("seg fault somewhere");
 	if (!s)
 		return (0);
 	while (s[i] != '\0')
@@ -21,12 +32,13 @@ void	*cutstring(char *str, int i)
 	temp = malloc(sizeof(char) * (i + 1));
 	if (!temp)
 		return NULL;
-	temp[i + 1] = '\0';
+	temp[i] = '\0';
 	while(i >= 0)
 	{
 		temp[i] = str[i];
 		i--;
 	}
+	free(str);
 	return temp;
 }
 int ft_findline2(char *str)
@@ -57,8 +69,8 @@ char	*copytostr(char *str, char *buffer, int *bufferi)
 	
 	i = 0;
 	j = 0;
-	printf("copytostr\n");
-	printf("str:%s\nbuffer:%s\nbufferi:%d\n", str, buffer, *bufferi);
+	// printf("copytostr\n");
+	// printf("str:%s\nbuffer:%s\nbufferi:%d\n", str, buffer, *bufferi);
 	if (!str && !buffer)
 		return (NULL);
 	else
@@ -67,14 +79,12 @@ char	*copytostr(char *str, char *buffer, int *bufferi)
 		temp = malloc(sizeof(char) * ((ft_strlen(str) + *bufferi + 1)));
 		if (!temp)
 			return (NULL);
-
-		while (str[i] != '\0')
+		while (str != NULL && str[i] != '\0')
 		{
 			// printf("i:%d, c:%c\n", i, str[i]);
 			temp[i] = str[i];	
 			i++;
 		}
-		// buffer[*bufferi + 1] = '\0';
 		while(*bufferi > j)
 		{
 			temp[i + j] = buffer[j];
@@ -82,7 +92,7 @@ char	*copytostr(char *str, char *buffer, int *bufferi)
 		}
 		temp[i + j] = '\0';
 		// printf("copy to str: %s\n", temp);
-		free(str);
+		free(str); //impt
 		return (temp);
 	}
 }
@@ -96,7 +106,6 @@ char *get_next_line(int fd)
 	if (!fd || fd < 0)
 		return NULL;
 	buffer = malloc(sizeof(char) * BUFFER_SIZE);
-	// str = malloc (sizeof(char) * 1);
 	str = NULL;
 	if (!buffer)
 		return NULL;
@@ -109,20 +118,37 @@ char *get_next_line(int fd)
 			free(buffer);
 			return (cutstring(str, ft_findline2(str)));
 		}
-		printf("looping: %s\n", str);
-		free(buffer);
+		// printf("looping: %s\n", str);
+		//free(buffer);
 	}
 
-	printf("break out of while loop\n");
-	printf("check str content:%s\n", str);
+	// printf("break out of while loop\n");
+	// printf("check str content:%s\n", str);
 	if (str != NULL)
 	{
-		printf("return str\n");
+		// printf("return str\n");
+		free(buffer); //error?
 		return (str);
+	}
+	else if (!bufferi || bufferi < 0)
+	{
+		free(buffer);
+		return str;
 	}
 	else
 		return NULL;
 }
+
+
+// #include <fcntl.h> //to remove
+
+// int main(void)
+// {
+//     int fd = open("test.txt", O_RDONLY);
+// 	printf("result:%s", get_next_line(fd));
+//     close(fd);
+//     return (0);
+// }
 
 
 #include <fcntl.h> //to remove
@@ -130,7 +156,7 @@ char *get_next_line(int fd)
 int main(void)
 {
     int fd = open("test.txt", O_RDONLY);
-	printf("result:%s", get_next_line(fd));
+	printf("result:%s:smth else", get_next_line(fd));
     close(fd);
     return (0);
 }
