@@ -1,210 +1,215 @@
+
 #include "stdio.h"
 #include "stddef.h"
 #include "stdlib.h"
 #include "get_next_line.h"
 
-int ft_strlen(char *str)
+int	ft_strlen(char *str)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	if (!str)
-		return 0;
-	
-	while(str[i] != '\0')
-	{
+		return (0);
+	while (str[i] != '\0')
 		i++;
-	}
-	return i;
+	return (i);
 }
 
-char *ft_strjoin(char *str, char *buffer, int bufferi)
+char	*ft_strjoin(char *str, char *buffer, int bufferi)
 {
-	int strlen;
-	int i;
-	char *newstr;
-	int j;
-
+	int		strlen;
+	int		i;
+	char	*newstr;
+	int		j;
 
 	strlen = ft_strlen(str);
-	newstr = malloc(sizeof(char) * (strlen + bufferi + 1));//here may have issue1
+	newstr = malloc(sizeof(char) * (strlen + bufferi + 1));
 	if (!newstr)
-		return NULL;
-
+	{
+		// free(buffer); //newly added
+		// free(str);
+		return (NULL);
+	}
 	i = 0;
-	while(str[i] != '\0')
+	while (str[i] != '\0')
 	{
 		newstr[i] = str[i];
 		i++;
 	}
-
 	j = 0;
-	while(bufferi > j)
+	while (bufferi > j)
 	{
 		newstr[i + j] = buffer[j];
 		j++;
 	}
 	newstr[i + j] = '\0';
 	free(str);
-	return newstr;
+	// maybe need to null here 
+	return (newstr);
 }
 
-int ft_findline2(char *str)
+int	ft_findline2(char *str)
 {
 	int	j;
 
 	j = 0;
 	while (str[j] != '\0' && str[j] != '\n')
 		j++;
-
-	if (str[j] == '\n'
-	// && j != 0
-	)
+	if (str[j] == '\n')
 	{
-		// printf("return findline2\n");
-		return (j + 1); //here is the issue. .
+		return (j + 1);
 	}
 	else
 	{
-		// pritf("check the val:%d, char:%c;\n", j, str[j]);
 		return (-1);
 	}
 }
 
-char *ft_processstr(char *str, int len)
+char	*ft_processstr(char *str, int len)
 {
-	int newlen;
-	char *newstr;
+	int		newlen;
+	char	*newstr;
+	int		j;
 
-	int j = 0;
-	newlen = ft_strlen(str) - len; 
+	j = 0;
+	newlen = ft_strlen(str) - len;
 	newstr = malloc(sizeof(char) * (newlen + 1));
 	if (!newstr)
-		return NULL;
-		
-	while(str[len + j] != '\0')
+	{
+		//do i need to free?
+		return (NULL);
+	}
+	while (str[len + j] != '\0')
 	{
 		newstr[j] = str[len + j];
 		j++;
 	}
 	newstr[j] = '\0';
 	free(str);
-	return newstr;
+	return (newstr);
 }
 
-char *ft_processline(char *str, char *line, int len)
+char	*ft_processline(char *str, char *line, int len)
 {
+	int	i;
+
 	line = malloc(sizeof(char) * (len + 1));
 	if (!line)
-		return NULL;
-	int i;
+	{
+		//do i need to free?
+		return (NULL);
+	}
 	i = 0;
-
 	while (len > i)
 	{
 		line[i] = str[i];
 		i++;
 	}
 	line[i] = '\0';
-
-	return line;
+	return (line);
 }
 
-char *freestr(char *str)
+char	*get_next_line(int fd)
 {
-	free(str);
-	str = NULL;
-	return str;
-}
+	char		*buffer;
+	static char	*str;
+	int			bufferi;
+	char		*line;
+	int			linelen;
 
-char *get_next_line(int fd)
-{
-	char *buffer;
-	static char *str;
-	int bufferi;
-	char *line;
-
-	int linelen;
 	line = NULL;
-
 	if (fd < 0)
-		return NULL;
-	
-	
-
-	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+		return (NULL);
+	buffer = malloc(sizeof(char) * (BUFFER_SIZE  ));
 	if (!buffer)
-		return NULL;
-
+	{
+		return (NULL);
+	}
 	if (!str)
 	{
 		str = malloc(sizeof(char) * 1);
-		if(!str)
-			return NULL;
+		if (!str)
+		{
+			free(buffer);
+			return (NULL);
+		}
 		str[0] = '\0';
 	}
-
-	while ( (bufferi = read(fd, buffer, BUFFER_SIZE)) > 0 )
+	while ((bufferi = read(fd, buffer, BUFFER_SIZE)) > 0)
 	{
 		str = ft_strjoin(str, buffer, bufferi);
+		//to check if str is null
+		// if (str == NULL)
+		// 	return (NULL);
+
 		linelen = ft_findline2(str);
 		if (linelen != -1)
-		{	
+		{
 			free(buffer);
 			line = ft_processline(str, line, linelen);
-			str =  ft_processstr(str,linelen);
-			return line;
+			// to check if line is null
+			str = ft_processstr(str, linelen);
+			// to check if str is null
+			
+			// if (str == NULL || line == NULL)
+			// 	return (NULL);
+			return (line);
 		}
 	}
 
-	if (str[0] == '\0' || bufferi == -1)
-	{		
+	if (str[0] == '\0' || bufferi == -1 ) //checking
+	{
 		free(buffer);
 		free(str);
 		str = NULL;
-		return str;
+		return (str);
 	}
-	else if (str[0] != '\0') 
+	else if (str[0] != '\0')
 	{
 		free(buffer);
 		linelen = ft_findline2(str);
 		if (linelen != -1)
 		{
 			line = ft_processline(str, line, linelen);
-			str =  ft_processstr(str,linelen);	
+			// to check if line is null [done]
+			str = ft_processstr(str, linelen);
+			// to check if str is null[done]
+
 		}
 		else
 		{
 			line = ft_processline(str, line, ft_strlen(str));
-			str =  ft_processstr(str, ft_strlen(str));	
+			// to check if line is null[done]
+			str = ft_processstr(str, ft_strlen(str));
+			// to check if str is null[done]
 		}
-		return line;
+		// if (line == NULL || str == NULL)
+		// 	return (NULL);
+		return (line);
 	}
 	else
 	{
 		free(buffer);
-		return NULL;
+		free(str);
+		return (NULL);
 	}
-
-	free(buffer);
-	return str;
 }
 
 //https://chat.openai.com/c/0399d682-eadd-4c96-a9a8-c98257feb72b 
-
 // #include <fcntl.h> //to remove
 // int main(void)
 // {
 //   // Create a temporary file and write test content to it.
 //   char test_content[] = 
-  
+
 // 						// "0123456789012345678901234567890123456789x0\n"
 // 						// "0123456789012345678901234567890123456789x1\n"
 // 						// "0123456789012345678901234567890123456789x2\n"
 // 						// "0123456789012345678901234567890123456789x3\n"
 // 						// "0123456789012345678901234567890123456789x4\n"
 // 						// "0123456789012345678901234567890123456789x5\n"
-		
+
 // 						// "\n"
 // 						// "\n"
 // 						// "\n"
@@ -214,9 +219,7 @@ char *get_next_line(int fd)
 // 							"90123456789\n" //here ownwards weird
 // 							"0123456789\n"
 // 							"xxxx\n"
-
 // 						;
-						
 // 	FILE *temp = fopen("temp_test.txt", "w+");
 // 	if (!temp)
 // 	{
@@ -225,7 +228,6 @@ char *get_next_line(int fd)
 // 	}
 // 	fwrite(test_content, sizeof(char), sizeof(test_content) - 1, temp);
 // 	fclose(temp);
-
 // 	// Open the temporary file to read with get_next_line.
 // 	int fd = open("temp_test.txt", O_RDONLY);
 // 	if (fd == -1)
@@ -233,7 +235,6 @@ char *get_next_line(int fd)
 // 		perror("Error opening the temporary file");
 // 		return 1;
 // 	}
-
 // 	int i = 0;
 // 	char *line = NULL;
 // 	// line = get_next_line(fd);
@@ -249,12 +250,8 @@ char *get_next_line(int fd)
 // 		free(line);
 // 		i ++;
 // 	}
-
 // 	close(fd);
 // 	// Optionally, remove the temporary file after testing.
 // 	remove("temp_test.txt");
-
 // 	return 0;
 // }
-
-
