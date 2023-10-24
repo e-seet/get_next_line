@@ -68,6 +68,8 @@ char	*ft_processstr(char *str, int len)
 	char	*newstr;
 	int		j;
 
+	if (len == -1)
+		len = ft_strlen(str);
 	j = 0;
 	newlen = ft_strlen(str) - len;
 	newstr = malloc(sizeof(char) * (newlen + 1));
@@ -87,6 +89,8 @@ char	*ft_processline(char *str, char *line, int len)
 {
 	int	i;
 
+	if(len == -1)
+		len = ft_strlen(str);
 	line = malloc(sizeof(char) * (len + 1));
 	if (!line)
 		return (NULL);
@@ -99,6 +103,9 @@ char	*ft_processline(char *str, char *line, int len)
 	line[i] = '\0';
 	return (line);
 }
+
+
+
 
 char	*get_next_line(int fd)
 {
@@ -126,43 +133,24 @@ char	*get_next_line(int fd)
 		str = ft_strjoin(str, buffer, bufferi);
 		linelen = ft_findline2(str);
 		if (linelen != -1)
-		{
-			free(buffer);
-			line = ft_processline(str, line, linelen);
-			str = ft_processstr(str, linelen);
-			return (line);
-		}
+			break;
 	}
+	free(buffer);
 	if (str[0] == '\0' || bufferi == -1)
 	{
-		free(buffer);
 		free(str);
 		str = NULL;
 		return (str);
 	}
 	else if (str[0] != '\0')
 	{
-		free(buffer);
 		linelen = ft_findline2(str);
-		if (linelen != -1)
-		{
-			line = ft_processline(str, line, linelen);
-			str = ft_processstr(str, linelen);
-		}
-		else
-		{
-			line = ft_processline(str, line, ft_strlen(str));
-			str = ft_processstr(str, ft_strlen(str));
-		}
+		line = ft_processline(str, line, linelen);
+		str = ft_processstr(str, linelen);
 		return (line);
 	}
 	else
-	{
-		free(buffer);
 		return (NULL);
-	}
-	free(buffer);
-	return (str);
 }
 
 //https://chat.openai.com/c/0399d682-eadd-4c96-a9a8-c98257feb72b 
