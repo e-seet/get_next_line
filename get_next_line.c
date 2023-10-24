@@ -85,11 +85,30 @@ char	*ft_processstr(char *str, int len)
 	return (newstr);
 }
 
+char	*ft_read_and_join(char *str, int fd, int *bufferi)
+{
+	char	*buffer;
+	int		linelen;
+
+	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (NULL);
+	while ((*bufferi = (read(fd, buffer, BUFFER_SIZE))) > 0)
+	{
+		str = ft_strjoin(str, buffer, *bufferi);
+		linelen = ft_findline2(str);
+		if (linelen != -1)
+			break ;
+	}
+	free(buffer);
+	return (str);
+}
+
 char	*ft_processline(char *str, char *line, int len)
 {
-	int	i;
+	int		i;
 
-	if(len == -1)
+	if (len == -1)
 		len = ft_strlen(str);
 	line = malloc(sizeof(char) * (len + 1));
 	if (!line)
@@ -104,22 +123,32 @@ char	*ft_processline(char *str, char *line, int len)
 	return (line);
 }
 
-
-
+// char *processresult(char *str, char *line, int bufferi)
+// {
+// 	if (str[0] == '\0' || bufferi == -1)
+// 	{
+// 		free(str);
+// 		str = NULL;
+// 		return (str);
+// 	}
+// 	else if (str[0] != '\0')
+// 	{
+// 		line = ft_processline(str, line, ft_findline2(str));
+// 		str = ft_processstr(str, ft_findline2(str));
+// 		return (line);
+// 	}
+// 	else
+// 		return (NULL);
+// }
 
 char	*get_next_line(int fd)
 {
-	char		*buffer;
 	static char	*str;
 	int			bufferi;
-	char		*line;
-	int			linelen;
-
+	char	 	*line;
+	
 	line = NULL;
 	if (fd < 0)
-		return (NULL);
-	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buffer)
 		return (NULL);
 	if (!str)
 	{
@@ -128,14 +157,7 @@ char	*get_next_line(int fd)
 			return (NULL);
 		str[0] = '\0';
 	}
-	while ((bufferi = (read(fd, buffer, BUFFER_SIZE))) > 0)
-	{
-		str = ft_strjoin(str, buffer, bufferi);
-		linelen = ft_findline2(str);
-		if (linelen != -1)
-			break;
-	}
-	free(buffer);
+	str = ft_read_and_join(str, fd, &bufferi);
 	if (str[0] == '\0' || bufferi == -1)
 	{
 		free(str);
@@ -144,9 +166,8 @@ char	*get_next_line(int fd)
 	}
 	else if (str[0] != '\0')
 	{
-		linelen = ft_findline2(str);
-		line = ft_processline(str, line, linelen);
-		str = ft_processstr(str, linelen);
+		line = ft_processline(str, line, ft_findline2(str));
+		str = ft_processstr(str, ft_findline2(str));
 		return (line);
 	}
 	else
