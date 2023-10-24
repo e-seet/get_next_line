@@ -1,66 +1,4 @@
-#include "stdio.h"
-#include "stddef.h"
-#include "stdlib.h"
 #include "get_next_line.h"
-
-int	ft_strlen(char *str)
-{
-	int	i;
-
-	i = 0;
-	if (!str)
-		return (0);
-	while (str[i] != '\0')
-	{
-		i++;
-	}
-	return (i);
-}
-
-char	*ft_strjoin(char *str, char *buffer, int bufferi)
-{
-	int		strlen;
-	int		i;
-	char	*newstr;
-	int		j;
-
-	i = 0;
-	strlen = ft_strlen(str);
-	newstr = malloc(sizeof(char) * (strlen + bufferi + 1));
-	if (!newstr)
-		return (NULL);
-	while (str[i] != '\0')
-	{
-		newstr[i] = str[i];
-		i++;
-	}
-	j = 0;
-	while (bufferi > j)
-	{
-		newstr[i + j] = buffer[j];
-		j++;
-	}
-	newstr[i + j] = '\0';
-	free(str);
-	return (newstr);
-}
-
-int	ft_findline2(char *str)
-{
-	int	j;
-
-	j = 0;
-	while (str[j] != '\0' && str[j] != '\n')
-		j++;
-	if (str[j] == '\n')
-	{
-		return (j + 1);
-	}
-	else
-	{
-		return (-1);
-	}
-}
 
 char	*ft_processstr(char *str, int len)
 {
@@ -85,25 +23,6 @@ char	*ft_processstr(char *str, int len)
 	return (newstr);
 }
 
-char	*ft_read_and_join(char *str, int fd, int *bufferi)
-{
-	char	*buffer;
-	int		linelen;
-
-	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buffer)
-		return (NULL);
-	while ((*bufferi = (read(fd, buffer, BUFFER_SIZE))) > 0)
-	{
-		str = ft_strjoin(str, buffer, *bufferi);
-		linelen = ft_findline2(str);
-		if (linelen != -1)
-			break ;
-	}
-	free(buffer);
-	return (str);
-}
-
 char	*ft_processline(char *str, char *line, int len)
 {
 	int		i;
@@ -123,33 +42,29 @@ char	*ft_processline(char *str, char *line, int len)
 	return (line);
 }
 
-// char *processresult(char *str, char *line, int bufferi)
-// {
-// 	if (str[0] == '\0' || bufferi == -1)
-// 	{
-// 		free(str);
-// 		str = NULL;
-// 		return (str);
-// 	}
-// 	else if (str[0] != '\0')
-// 	{
-// 		line = ft_processline(str, line, ft_findline2(str));
-// 		str = ft_processstr(str, ft_findline2(str));
-// 		return (line);
-// 	}
-// 	else
-// 		return (NULL);
-// }
-
-char	*get_next_line(int fd)
+char	*ft_read_and_join(char *str, int fd, int *bufferi)
 {
-	static char	*str;
-	int			bufferi;
-	char	 	*line;
-	
-	line = NULL;
-	if (fd < 0)
+	char	*buffer;
+	int		linelen;
+
+	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
 		return (NULL);
+	*bufferi = read(fd, buffer, BUFFER_SIZE);
+	while (*bufferi > 0)
+	{
+		str = ft_strjoin(str, buffer, *bufferi);
+		linelen = ft_findline2(str);
+		if (linelen != -1)
+			break ;
+		*bufferi = read(fd, buffer, BUFFER_SIZE);
+	}
+	free(buffer);
+	return (str);
+}
+
+char	*ft_createstr(char *str)
+{
 	if (!str)
 	{
 		str = malloc(sizeof(char) * 1);
@@ -157,6 +72,21 @@ char	*get_next_line(int fd)
 			return (NULL);
 		str[0] = '\0';
 	}
+	return (str);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*str;
+	int			bufferi;
+	char		*line;
+
+	line = NULL;
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	str = ft_createstr(str);
+	if (!str)
+		return (NULL);
 	str = ft_read_and_join(str, fd, &bufferi);
 	if (str[0] == '\0' || bufferi == -1)
 	{
