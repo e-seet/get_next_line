@@ -1,5 +1,7 @@
 #include "get_next_line.h"
 
+// Create a remainder string based on the len given.
+// Copy the new string content from the start of the len
 char	*ft_processstr(char *str, int len)
 {
 	int		newlen;
@@ -23,6 +25,8 @@ char	*ft_processstr(char *str, int len)
 	return (newstr);
 }
 
+//Create a new line based on the len given.
+//the line will cut from the front of the string
 char	*ft_processline(char *str, char *line, int len)
 {
 	int		i;
@@ -42,6 +46,10 @@ char	*ft_processline(char *str, char *line, int len)
 	return (line);
 }
 
+//1. Read fd.
+//2. Join copy buffer to str
+//3. Find \n in str
+//4. if found, break and return str
 char	*ft_read_and_join(char *str, int fd, int *bufferi)
 {
 	char	*buffer;
@@ -63,6 +71,9 @@ char	*ft_read_and_join(char *str, int fd, int *bufferi)
 	return (str);
 }
 
+//1. create a str if it doesnt exist.
+//2. The string is null terminated.
+//3. return null if malloc fail
 char	*ft_createstr(char *str)
 {
 	if (!str)
@@ -88,12 +99,14 @@ char	*get_next_line(int fd)
 	if (!str)
 		return (NULL);
 	str = ft_read_and_join(str, fd, &bufferi);
+	// check if the str is empty or read failed.
 	if (str[0] == '\0' || bufferi == -1)
 	{
 		free(str);
 		str = NULL;
 		return (str);
 	}
+	// verify that the string is not empty
 	else if (str[0] != '\0')
 	{
 		line = ft_processline(str, line, ft_findline2(str));

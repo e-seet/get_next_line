@@ -42,6 +42,8 @@ char	*ft_strjoin(char *str, char *buffer, int bufferi)
 	return (newstr);
 }
 
+// Return the index of \n in str. 
+// the \n needs to be returned as well.
 int	ft_findline2(char *str)
 {
 	int	j;
